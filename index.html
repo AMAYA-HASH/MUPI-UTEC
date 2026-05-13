@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width,
+initial-scale=1.0,
+maximum-scale=1.0,
+user-scalable=no">
+
+<title>MUPI UTEC</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html, body{
+
+    width:100%;
+    height:100%;
+
+    overflow:hidden;
+
+    background:#000;
+
+    font-family:Arial, Helvetica, sans-serif;
+
+    touch-action:pan-y;
+}
+
+.slider{
+
+    width:100%;
+    height:100%;
+
+    position:relative;
+
+    overflow:hidden;
+}
+
+.slides{
+
+    display:flex;
+
+    width:400%;
+    height:100%;
+
+    transition:transform 0.8s ease-in-out;
+}
+
+.slide{
+
+    width:100vw;
+    height:100vh;
+
+    flex-shrink:0;
+
+    position:relative;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    overflow:hidden;
+}
+
+/* IMAGENES PRINCIPALES */
+
+.slide img.main-image{
+
+    width:96%;
+    height:96%;
+
+    object-fit:contain;
+
+    background:#000;
+
+    user-select:none;
+
+    -webkit-user-drag:none;
+
+    pointer-events:none;
+}
+
+/* OVERLAY */
+
+.overlay{
+
+    position:absolute;
+
+    inset:0;
+
+    background:linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.06),
+        rgba(0,0,0,0.02)
+    );
+}
+
+/* INDICADORES */
+
+.indicators{
+
+    position:absolute;
+
+    bottom:18px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    display:flex;
+
+    gap:10px;
+
+    z-index:50;
+}
+
+.dot{
+
+    width:9px;
+    height:9px;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,0.35);
+
+    transition:0.3s;
+}
+
+.dot.active{
+
+    background:white;
+
+    transform:scale(1.2);
+}
+
+/* ZONAS TÁCTILES */
+
+.touch-zone{
+
+    position:absolute;
+
+    z-index:40;
+
+    cursor:pointer;
+}
+
+/* POPUPS */
+
+.popup{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,0,0,0.84);
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+    align-items:center;
+
+    z-index:999;
+
+    opacity:0;
+
+    pointer-events:none;
+
+    transition:0.4s ease;
+
+    backdrop-filter:blur(8px);
+}
+
+.popup.active{
+
+    opacity:1;
+
+    pointer-events:auto;
+}
+
+.popup img{
+
+    width:75%;
+
+    max-width:360px;
+
+    border-radius:24px;
+
+    transform:scale(0.7);
+
+    transition:0.4s ease;
+
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+
+    object-fit:contain;
+}
+
+.popup.active img{
+
+    transform:scale(1);
+}
+
+/* BOTONES */
+
+.close-btn{
+
+    margin-top:25px;
+
+    background:white;
+    color:black;
+
+    border:none;
+
+    padding:14px 28px;
+
+    border-radius:40px;
+
+    font-size:16px;
+    font-weight:bold;
+
+    cursor:pointer;
+}
+
+/* POPUP PERRO */
+
+.perro-popup img{
+
+    width:60%;
+
+    max-width:520px;
+}
+
+/* GALERÍA */
+
+.gallery-popup{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,0,0,0.92);
+
+    z-index:999;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    opacity:0;
+
+    pointer-events:none;
+
+    transition:0.4s ease;
+}
+
+.gallery-popup.active{
+
+    opacity:1;
+
+    pointer-events:auto;
+}
+
+/* TITULO */
+
+.gallery-title{
+
+    color:white;
+
+    text-align:center;
+
+    font-size:26px;
+
+    font-weight:bold;
+
+    margin-bottom:30px;
+
+    letter-spacing:2px;
+}
+
+/* CARRUSEL */
+
+.gallery-track{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:30px;
+
+    overflow-x:auto;
+
+    padding:0 28vw;
+
+    scroll-snap-type:x mandatory;
+
+    -webkit-overflow-scrolling:touch;
+
+    scrollbar-width:none;
+}
+
+.gallery-track::-webkit-scrollbar{
+    display:none;
+}
+
+/* IMÁGENES GALERÍA */
+
+.gallery-track img{
+
+    max-width:75vw;
+    max-height:58vh;
+
+    width:auto;
+    height:auto;
+
+    object-fit:contain;
+
+    border-radius:22px;
+
+    scroll-snap-align:center;
+
+    transition:0.45s ease;
+
+    opacity:0.28;
+
+    transform:scale(0.82);
+
+    flex-shrink:0;
+
+    box-shadow:0 15px 40px rgba(0,0,0,0.4);
+}
+
+.gallery-track img.active{
+
+    opacity:1;
+
+    transform:scale(1);
+}
+
+/* BOTON CERRAR GALERÍA */
+
+.gallery-close{
+
+    position:absolute;
+
+    top:30px;
+    right:30px;
+
+    background:white;
+
+    border:none;
+
+    padding:12px 20px;
+
+    border-radius:40px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="slider">
+
+    <div class="slides" id="slides">
+
+        <!-- SLIDE 1 -->
+
+        <div class="slide">
+
+            <img src="slide1.jpg"
+            class="main-image">
+
+            <div class="overlay"></div>
+
+            <!-- QR 1 -->
+
+            <div class="touch-zone"
+            id="qr1Touch"
+
+            style="
+            width:12%;
+            height:10%;
+            bottom:13%;
+            right:6%;
+            ">
+            </div>
+
+        </div>
+
+        <!-- SLIDE 2 -->
+
+        <div class="slide">
+
+            <img src="slide2.jpg"
+            class="main-image">
+
+            <div class="overlay"></div>
+
+            <!-- PERRO -->
+
+            <div class="touch-zone"
+            id="perroTouch"
+
+            style="
+            width:16%;
+            height:22%;
+            top:36%;
+            left:42%;
+            ">
+            </div>
+
+            <!-- QR 2 -->
+
+            <div class="touch-zone"
+            id="qr2Touch"
+
+            style="
+            width:11%;
+            height:10%;
+            bottom:12%;
+            right:6%;
+            ">
+            </div>
+
+        </div>
+
+        <!-- SLIDE 3 -->
+
+        <div class="slide">
+
+            <img src="slide3.jpg"
+            class="main-image">
+
+            <div class="overlay"></div>
+
+            <!-- GALERÍA -->
+
+            <div class="touch-zone"
+            id="galleryTouch"
+
+            style="
+            width:22%;
+            height:55%;
+            top:22%;
+            right:5%;
+            ">
+            </div>
+
+        </div>
+
+        <!-- SLIDE 4 -->
+
+        <div class="slide">
+
+            <img src="slide4.jpg"
+            class="main-image">
+
+            <div class="overlay"></div>
+
+        </div>
+
+    </div>
+
+    <!-- INDICADORES -->
+
+    <div class="indicators">
+
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+
+    </div>
+
+</div>
+
+<!-- QR 1 -->
+
+<div class="popup"
+id="qr1Popup">
+
+    <img src="qr-arquitectura.png">
+
+    <button class="close-btn"
+    onclick="closePopup('qr1Popup')">
+
+        Cerrar
+
+    </button>
+
+</div>
+
+<!-- QR 2 -->
+
+<div class="popup"
+id="qr2Popup">
+
+    <img src="qr-gnius.png">
+
+    <button class="close-btn"
+    onclick="closePopup('qr2Popup')">
+
+        Cerrar
+
+    </button>
+
+</div>
+
+<!-- PERRO -->
+
+<div class="popup perro-popup"
+id="perroPopup">
+
+    <img src="perro-utec.png">
+
+</div>
+
+<!-- GALERÍA -->
+
+<div class="gallery-popup"
+id="galleryPopup">
+
+    <button class="gallery-close"
+    onclick="closeGallery()">
+
+        Cerrar
+
+    </button>
+
+    <div class="gallery-title">
+
+        PROYECTOS DESTACADOS
+
+    </div>
+
+    <div class="gallery-track"
+    id="galleryTrack">
+
+        <img src="proyecto1.jpg">
+        <img src="proyecto2.jpg">
+        <img src="proyecto3.jpg">
+        <img src="proyecto4.jpg">
+        <img src="proyecto5.jpg">
+        <img src="proyecto6.jpg">
+        <img src="proyecto7.jpg">
+        <img src="proyecto8.jpg">
+        <img src="proyecto9.jpg">
+
+    </div>
+
+</div>
+
+<script>
+
+const slides =
+document.getElementById("slides");
+
+const dots =
+document.querySelectorAll(".dot");
+
+let current = 0;
+
+let autoplay;
+
+let inactivityTimer;
+
+let interactionLocked = false;
+
+const totalSlides = 4;
+
+/* CAMBIAR SLIDE */
+
+function goToSlide(index){
+
+    if(interactionLocked) return;
+
+    current = index;
+
+    if(current >= totalSlides){
+        current = 0;
+    }
+
+    if(current < 0){
+        current = totalSlides - 1;
+    }
+
+    slides.style.transform =
+    `translateX(-${current * 100}vw)`;
+
+    updateDots();
+}
+
+/* INDICADORES */
+
+function updateDots(){
+
+    dots.forEach(dot =>
+    dot.classList.remove("active"));
+
+    dots[current]
+    .classList.add("active");
+}
+
+/* AUTOPLAY */
+
+function startAutoplay(){
+
+    if(interactionLocked) return;
+
+    clearInterval(autoplay);
+
+    autoplay = setInterval(()=>{
+
+        goToSlide(current + 1);
+
+    }, 6000);
+}
+
+function stopAutoplay(){
+
+    clearInterval(autoplay);
+}
+
+/* INACTIVIDAD */
+
+function resetInactivity(){
+
+    clearTimeout(inactivityTimer);
+
+    inactivityTimer = setTimeout(()=>{
+
+        closeAll();
+
+        interactionLocked = false;
+
+        startAutoplay();
+
+    }, 15000);
+}
+
+/* SWIPE PRINCIPAL */
+
+let startX = 0;
+let endX = 0;
+
+document.addEventListener("touchstart",(e)=>{
+
+    if(interactionLocked) return;
+
+    startX =
+    e.touches[0].clientX;
+
+    stopAutoplay();
+
+    resetInactivity();
+});
+
+document.addEventListener("touchmove",(e)=>{
+
+    if(interactionLocked) return;
+
+    endX =
+    e.touches[0].clientX;
+});
+
+document.addEventListener("touchend",()=>{
+
+    if(interactionLocked) return;
+
+    let diff = startX - endX;
+
+    if(diff > 50){
+
+        goToSlide(current + 1);
+    }
+
+    if(diff < -50){
+
+        goToSlide(current - 1);
+    }
+});
+
+/* POPUPS */
+
+function openPopup(id){
+
+    stopAutoplay();
+
+    interactionLocked = true;
+
+    document
+    .getElementById(id)
+    .classList.add("active");
+
+    resetInactivity();
+}
+
+function closePopup(id){
+
+    document
+    .getElementById(id)
+    .classList.remove("active");
+
+    interactionLocked = false;
+
+    resetInactivity();
+}
+
+/* CERRAR TODO */
+
+function closeAll(){
+
+    document
+    .querySelectorAll(".popup")
+    .forEach(popup=>{
+
+        popup.classList.remove("active");
+    });
+
+    closeGallery();
+}
+
+/* QR 1 */
+
+document
+.getElementById("qr1Touch")
+.addEventListener("click",(e)=>{
+
+    e.stopPropagation();
+
+    openPopup("qr1Popup");
+});
+
+/* QR 2 */
+
+document
+.getElementById("qr2Touch")
+.addEventListener("click",(e)=>{
+
+    e.stopPropagation();
+
+    openPopup("qr2Popup");
+});
+
+/* PERRO */
+
+document
+.getElementById("perroTouch")
+.addEventListener("click",(e)=>{
+
+    e.stopPropagation();
+
+    openPopup("perroPopup");
+});
+
+/* CERRAR POPUPS TOCANDO */
+
+document
+.querySelectorAll(".popup")
+.forEach(popup=>{
+
+    popup.addEventListener("click",()=>{
+
+        popup.classList.remove("active");
+
+        interactionLocked = false;
+
+        resetInactivity();
+    });
+});
+
+/* GALERÍA */
+
+const galleryPopup =
+document.getElementById("galleryPopup");
+
+const galleryTrack =
+document.getElementById("galleryTrack");
+
+const galleryImages =
+galleryTrack.querySelectorAll("img");
+
+/* ABRIR GALERÍA */
+
+document
+.getElementById("galleryTouch")
+.addEventListener("click",(e)=>{
+
+    e.stopPropagation();
+
+    stopAutoplay();
+
+    interactionLocked = true;
+
+    galleryPopup.classList.add("active");
+
+    updateGallery();
+
+    resetInactivity();
+});
+
+/* CERRAR GALERÍA */
+
+function closeGallery(){
+
+    galleryPopup
+    .classList.remove("active");
+
+    interactionLocked = false;
+}
+
+/* EFECTO CENTRO */
+
+function updateGallery(){
+
+    const center =
+    window.innerWidth / 2;
+
+    galleryImages.forEach(img=>{
+
+        const rect =
+        img.getBoundingClientRect();
+
+        const imgCenter =
+        rect.left + rect.width / 2;
+
+        const distance =
+        Math.abs(center - imgCenter);
+
+        if(distance < 180){
+
+            img.classList.add("active");
+
+        }else{
+
+            img.classList.remove("active");
+        }
+    });
+}
+
+/* SOLO MOVER GALERÍA */
+
+galleryTrack.addEventListener(
+"touchstart",
+(e)=>{
+
+    e.stopPropagation();
+
+},
+{passive:true}
+);
+
+galleryTrack.addEventListener(
+"touchmove",
+(e)=>{
+
+    e.stopPropagation();
+
+},
+{passive:true}
+);
+
+/* SCROLL GALERÍA */
+
+galleryTrack.addEventListener(
+"scroll",
+updateGallery
+);
+
+/* INICIO */
+
+startAutoplay();
+
+</script>
+
+</body>
+
+</html>
